@@ -168,7 +168,7 @@ public:
 		{
 			if (tasks[i].GetId() == number)
 			{
-				isFound == true;
+				isFound = true;
 
 				std::cin.ignore(32767, '\n');
 
