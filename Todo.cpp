@@ -11,6 +11,10 @@
 #include "imgui_impl_dx11.h"
 #include <d3d11.h>
 #include <tchar.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
 
 // Data
 static ID3D11Device*            g_pd3dDevice = nullptr;
@@ -27,7 +31,148 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+
+class Task
+{
+	int id;
+	std::string title;
+	std::string description;
+	bool completed;
+
+public:
+	Task(int p_id, std::string p_title, std::string p_description, bool p_completed) : id{ p_id }, title{ std::move(p_title) }, description{std::move(p_description) }, completed{ p_completed }
+	{
+
+	}
+
+	int GetId() const
+	{
+		return id;
+	}
+
+	const std::string& GetTitle() const
+	{
+		return title;
+	}
+
+	const std::string& GetDescription() const
+	{
+		return description;
+	}
+
+	bool GetCompleted() const
+	{
+		return completed;
+	}
+
+	void SetTitle(const std::string& newTitle)
+	{
+		title = newTitle;
+	}
+
+	void SetDescription(const std::string& newDescription)
+	{
+		description = newDescription;
+	}
+
+	void SetCompeted(const bool& newCompleted)
+	{
+		completed = newCompleted;
+	}
+
+};
+
+class Todo
+{
+	int newId = 1;
+
+public:
+
+std::vector<Task> tasks;
+
+	void addTask(std::string newTitle, std::string newDescription)
+	{
+
+
+		tasks.push_back(Task(newId, std::move(newTitle), std::move(newDescription), false));
+		newId++;
+
+	};
+
+
+	void changeTask(int targetId, std::string newTitle, std::string newDescription)
+	{
+
+		for (size_t i = 0; i < tasks.size(); ++i)
+		{
+			if (tasks[i].GetId() == targetId)
+			{
+				tasks[i].SetTitle(newTitle);
+				tasks[i].SetDescription(newDescription);
+				break;
+			}
+		}
+	}
+
+	void taskCompleted(int targetId)
+	{
+
+		for (size_t i = 0; i < tasks.size(); ++i)
+		{
+			if (tasks[i].GetId() == targetId)
+			{
+				tasks[i].SetCompeted(true);
+				break;
+			}
+		}
+
+	}
+
+	void dropTask(int targetId)
+	{
+
+		for (size_t i = 0; i < tasks.size(); ++i)
+		{
+			if (tasks[i].GetId() == targetId)
+			{
+
+				tasks.erase(tasks.begin() + i);
+				break;
+			}
+		}
+
+	}
+
+	void addToFile()
+	{
+		std::ofstream out("Todo.txt");
+
+		if (!out.is_open())
+		{
+			return;
+		}
+
+		for (size_t i = 0; i < tasks.size(); ++i)
+		{
+				out << tasks[i].GetId() << "\n"
+					<< tasks[i].GetTitle() << "\n"
+					<< tasks[i].GetDescription() << "\n"
+					<< (tasks[i].GetCompleted() ? " Выполнено " : " В процессе... ") << "\n"
+					<< std::endl;
+		}
+
+		out.close();
+
+	}
+
+
+
+};
+
 // Main code
+
+Todo list;
+
 int main(int, char**)
 {
     // Make process DPI aware and obtain main monitor scale
@@ -101,6 +246,9 @@ int main(int, char**)
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+    static char title_buf[128] = "";
+    static char desc_buf[128] = "";
+
     // Main loop
     bool done = false;
     while (!done)
@@ -151,15 +299,50 @@ int main(int, char**)
 
             ImGui::Begin("Мой Списочек Задач");
 
-			ImGui::Text("Здесь будут отображаться ваши задачи.");
+			ImGui::Text("Добавление новой задачи:");
 
-			if (ImGui::Button("Добавить тестовую задачу")) {
+            ImGui::InputText("Название", title_buf, IM_ARRAYSIZE(title_buf));
+            ImGui::InputText("Описание", desc_buf, IM_ARRAYSIZE(desc_buf));
 
+			if (ImGui::Button("Добавить задачу")) 
+            {
+                if(strlen(title_buf) > 0)
+                {
+                    list.addTask(title_buf, desc_buf);
+
+                    title_buf[0] = '\0';
+                    desc_buf[0] = '\0';
+                }
 			}
 
-			ImGui::End();
+            ImGui::Separator();
+            ImGui::Text("Ваши текущие дела:");
+
+            for(size_t i = 0; i < list.tasks.size(); i++)
+            {
+                Task& task = list.tasks[i];
+
+                bool is_completed = task.GetCompleted();
+
+                if(ImGui::Checkbox(("##check_" + std::to_string(i)).c_str(), &is_completed))
+                {
+                    list.taskCompleted(task.GetId());
+                }
+
+                ImGui::SameLine();
+
+                if(task.GetCompleted())
+                {
+                    ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "[%d] %s: %s (Выполнено)", task.GetId(), task.GetTitle().c_str(), task.GetDescription().c_str());
+                } else
+                {
+                    ImGui::Text("[%d] %s: %s", task.GetId(), task.GetTitle().c_str(), task.GetDescription().c_str());
+                }
 
 
+            }
+
+            ImGui::End();
 
         }
 
