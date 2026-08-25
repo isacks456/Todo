@@ -248,6 +248,9 @@ int main(int, char**)
 
     static char title_buf[128] = "";
     static char desc_buf[128] = "";
+    static char edit_title_buf[128] = "";
+    static char edit_desc_buf[128] = "";
+    static int editing_task_id = -1;
 
     // Main loop
     bool done = false;
@@ -324,9 +327,31 @@ int main(int, char**)
 
                 bool is_completed = task.GetCompleted();
 
+
                 if(ImGui::Checkbox(("##check_" + std::to_string(i)).c_str(), &is_completed))
                 {
                     list.taskCompleted(task.GetId());
+                }
+
+                ImGui::SameLine();
+
+                if(ImGui::Button(("Удалить##" + std::to_string(i)).c_str()))
+                {
+                    list.dropTask(task.GetId());
+
+                    i--;
+                }
+
+                ImGui::SameLine();
+
+                if(ImGui::Button(("Изменить##" + std::to_string(i)).c_str()))
+                {
+
+                    editing_task_id = task.GetId();
+
+                    strcpy_s(edit_title_buf, task.GetTitle().c_str());
+                    strcpy_s(edit_desc_buf, task.GetDescription().c_str());
+
                 }
 
                 ImGui::SameLine();
@@ -339,6 +364,30 @@ int main(int, char**)
                     ImGui::Text("[%d] %s: %s", task.GetId(), task.GetTitle().c_str(), task.GetDescription().c_str());
                 }
 
+
+            }
+
+            if(editing_task_id != -1)
+            {
+                ImGui::Separator();
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Редактирование задачи с ID: %d", editing_task_id);
+
+                ImGui::InputText("Новое название", edit_title_buf, IM_ARRAYSIZE(edit_title_buf));
+                ImGui::InputText("Новое описание", edit_desc_buf, IM_ARRAYSIZE(edit_desc_buf));
+
+                if(ImGui::Button("Сохранить изменения"))
+                {
+                    list.changeTask(editing_task_id, edit_title_buf,edit_desc_buf);
+
+                    editing_task_id = -1;
+                }
+
+                ImGui::SameLine();
+
+                if(ImGui::Button("Отмена"))
+                {
+                    editing_task_id = -1;
+                }
 
             }
 
