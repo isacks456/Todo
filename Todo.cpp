@@ -182,7 +182,7 @@ int main(int, char**)
     // Create application window
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(nullptr), nullptr, nullptr, nullptr, nullptr, L"ImGui Example", nullptr };
     ::RegisterClassExW(&wc);
-    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Dear ImGui DirectX11 Example", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
+    HWND hwnd = ::CreateWindowW(wc.lpszClassName, L"Todo By IsmaFx", WS_OVERLAPPEDWINDOW, 100, 100, (int)(1280 * main_scale), (int)(800 * main_scale), nullptr, nullptr, wc.hInstance, nullptr);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -209,8 +209,34 @@ int main(int, char**)
 
     // Setup scaling
     ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
-    style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+    // style.ScaleAllSizes(main_scale);        // Bake a fixed style scale. (until we have a solution for dynamic style scaling, changing this requires resetting Style + calling this again)
+    // style.FontScaleDpi = main_scale;        // Set initial font scale. (in docking branch: using io.ConfigDpiScaleFonts=true automatically overrides this for every window depending on the current monitor)
+
+    style.WindowRounding = 8.0f;     
+    style.FrameRounding = 6.0f;      
+    style.PopupRounding = 6.0f;      
+    style.FramePadding = ImVec2(6, 6); 
+    style.ItemSpacing = ImVec2(8, 8);
+
+    style.Colors[ImGuiCol_WindowBg]         = ImVec4(0.45f, 0.45f, 0.45f, 0.45f); 
+    style.Colors[ImGuiCol_Header]           = ImVec4(0.35f, 0.20f, 0.50f, 1.00f); 
+    style.Colors[ImGuiCol_HeaderHovered]    = ImVec4(0.45f, 0.25f, 0.65f, 1.00f); 
+// Кнопки
+    style.Colors[ImGuiCol_Button]           = ImVec4(0.20f, 0.60f, 0.90f, 1.00f); 
+    style.Colors[ImGuiCol_ButtonHovered]    = ImVec4(0.20f, 0.60f, 0.90f, 0.70f); 
+    style.Colors[ImGuiCol_ButtonActive]     = ImVec4(0.15f, 0.50f, 0.80f, 1.00f); 
+
+// Поля ввода (InputText, Checkbox)
+    style.Colors[ImGuiCol_FrameBg]          = ImVec4(0.20f, 0.22f, 0.27f, 1.00f); 
+    style.Colors[ImGuiCol_FrameBgHovered]   = ImVec4(0.25f, 0.28f, 0.35f, 1.00f);
+    style.Colors[ImGuiCol_FrameBgActive]    = ImVec4(0.30f, 0.34f, 0.42f, 1.00f);
+    style.Colors[ImGuiCol_CheckMark]        = ImVec4(0.70f, 0.30f, 0.90f, 1.00f);
+    
+
+    style.Colors[ImGuiCol_Border]         = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+
+
+    style.FrameBorderSize = 1.0f;  
 
     // Setup Platform/Renderer backends
     ImGui_ImplWin32_Init(hwnd);
@@ -244,7 +270,7 @@ int main(int, char**)
     // Our state
     bool show_demo_window = true;
     bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    ImVec4 clear_color = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
     static char title_buf[128] = "";
     static char desc_buf[128] = "";
@@ -300,7 +326,18 @@ int main(int, char**)
             static float f = 0.0f;
             static int counter = 0;
 
-            ImGui::Begin("Мой Списочек Задач");
+            ImGuiIO& io = ImGui::GetIO();
+            
+           
+            ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+            
+           
+            ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
+
+            
+            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar;
+
+            ImGui::Begin("Мой Списочек Задач", nullptr, window_flags);
 
 			ImGui::Text("Добавление новой задачи:");
 
@@ -320,6 +357,11 @@ int main(int, char**)
 
             ImGui::Separator();
             ImGui::Text("Ваши текущие дела:");
+
+            ImGuiWindowFlags child_flags = ImGuiWindowFlags_HorizontalScrollbar;
+
+            if (ImGui::BeginChild("TaskRegion", ImVec2(0, 300), true, child_flags))
+            {
 
             for(size_t i = 0; i < list.tasks.size(); i++)
             {
@@ -363,9 +405,10 @@ int main(int, char**)
                 {
                     ImGui::Text("[%d] %s: %s", task.GetId(), task.GetTitle().c_str(), task.GetDescription().c_str());
                 }
-
-
             }
+
+                ImGui::EndChild(); 
+        }
 
             if(editing_task_id != -1)
             {
