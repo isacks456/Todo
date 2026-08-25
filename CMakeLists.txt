@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(Todo 
     Todo.cpp
+    resource.rc
     external/imgui/imgui.cpp
     external/imgui/imgui_demo.cpp  
     external/imgui/imgui_draw.cpp

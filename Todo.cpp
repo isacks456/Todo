@@ -193,6 +193,16 @@ int main(int, char**)
     }
 
     // Show the window
+    
+    HICON hIcon = ::LoadIconW(wc.hInstance, MAKEINTRESOURCEW(1)); 
+    
+    if (!hIcon) {
+        hIcon = (HICON)::LoadImageW(nullptr, L"TodoFx.ico", IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+    }
+
+    ::SendMessageW(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+    ::SendMessageW(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
 
