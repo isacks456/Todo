@@ -112,6 +112,9 @@ std::vector<Task> tasks;
 				break;
 			}
 		}
+
+        addToFile();
+
 	}
 
 	void taskCompleted(int targetId)
@@ -125,6 +128,8 @@ std::vector<Task> tasks;
 				break;
 			}
 		}
+
+        addToFile();
 
 	}
 
@@ -145,6 +150,8 @@ std::vector<Task> tasks;
         {
             newId = 1;
         }
+
+        addToFile();
 
 	}
 
@@ -210,6 +217,9 @@ std::vector<Task> tasks;
     {
         tasks.erase(tasks.begin(), tasks.end());
         newId = 1;
+
+        addToFile();
+
     }
 
 
@@ -338,7 +348,7 @@ int main(int, char**)
     static bool show_empty_warning = false;
     static bool show_success_message = false;
 
-     list.loadFromFile();
+    list.loadFromFile();
 
     // Main loop
     bool done = false;
