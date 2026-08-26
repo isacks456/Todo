@@ -141,6 +141,11 @@ std::vector<Task> tasks;
 			}
 		}
 
+        if(tasks.empty())
+        {
+            newId = 1;
+        }
+
 	}
 
 	void addToFile()
