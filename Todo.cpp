@@ -206,6 +206,12 @@ std::vector<Task> tasks;
         newId = max_id + 1;
     }
 
+    void dropAllTasks()
+    {
+        tasks.erase(tasks.begin(), tasks.end());
+        newId = 1;
+    }
+
 
 
 
@@ -444,6 +450,13 @@ int main(int, char**)
                 ImGui::SameLine();
 
                 ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "Файл успешно создан!");
+            }
+
+            ImGui::SameLine();
+
+            if(ImGui::Button("Удалить все задачи"))
+            {
+                list.dropAllTasks();
             }
 
 
