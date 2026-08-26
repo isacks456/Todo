@@ -97,6 +97,7 @@ std::vector<Task> tasks;
 		tasks.push_back(Task(newId, std::move(newTitle), std::move(newDescription), false));
 		newId++;
 
+        addToFile(); 
 	};
 
 
@@ -345,8 +346,6 @@ int main(int, char**)
     static char edit_title_buf[128] = "";
     static char edit_desc_buf[128] = "";
     static int editing_task_id = -1;
-    static bool show_empty_warning = false;
-    static bool show_success_message = false;
 
     list.loadFromFile();
 
@@ -425,42 +424,8 @@ int main(int, char**)
                     title_buf[0] = '\0';
                     desc_buf[0] = '\0';
 
-                    show_empty_warning = false;
-                    show_success_message = false;
-
                 }
 			}
-
-            ImGui::SameLine();
-
-            if(ImGui::Button("Сохранить в файл"))
-            {
-                if(list.tasks.empty())
-                {
-                    show_empty_warning = true;
-                    show_success_message = false;
-                }
-                else
-                {
-                    show_empty_warning = false;
-                    show_success_message = true;
-                    list.addToFile();
-                }
-            }
-
-            if(show_empty_warning)
-            {
-                ImGui::SameLine();
-
-                ImGui::TextColored(ImVec4(1.0f, 0.3f, 0.3f, 1.0f), "Ошибка: Добавьте хотя бы одну задачу!");
-            }
-
-            if(show_success_message)
-            {
-                ImGui::SameLine();
-
-                ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.3f, 1.0f), "Файл успешно создан!");
-            }
 
             ImGui::SameLine();
 
