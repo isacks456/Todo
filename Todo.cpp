@@ -170,6 +170,43 @@ std::vector<Task> tasks;
 
 	}
 
+    void loadFromFile()
+    {
+        std::ifstream in("Todo.txt");
+
+        if (!in.is_open()) return; 
+
+        tasks.clear(); 
+        int max_id = 0; 
+
+        std::string line_id, title, desc, status_str, empty_line;
+
+        
+        while (std::getline(in, line_id))
+        {
+            std::getline(in, title);
+            std::getline(in, desc);
+            std::getline(in, status_str);
+            std::getline(in, empty_line); 
+
+            
+            int id = std::stoi(line_id); 
+            
+            bool completed = (status_str.find("Выполнено") != std::string::npos);
+
+            tasks.push_back(Task(id, title, desc, completed));
+
+            if (id > max_id) {
+                max_id = id;
+            }
+        }
+
+        in.close(); 
+
+        newId = max_id + 1;
+    }
+
+
 
 
 };
@@ -294,6 +331,8 @@ int main(int, char**)
     static int editing_task_id = -1;
     static bool show_empty_warning = false;
     static bool show_success_message = false;
+
+     list.loadFromFile();
 
     // Main loop
     bool done = false;
