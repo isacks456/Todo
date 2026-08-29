@@ -346,6 +346,7 @@ int main(int, char**)
     static char edit_title_buf[128] = "";
     static char edit_desc_buf[128] = "";
     static int editing_task_id = -1;
+    static int filter_mode = 0;
 
     list.loadFromFile();
 
@@ -432,11 +433,64 @@ int main(int, char**)
             if(ImGui::Button("Удалить все задачи"))
             {
                 list.dropAllTasks();
+                filter_mode = 0;
             }
 
 
             ImGui::Separator();
             ImGui::Text("Ваши текущие дела:");
+
+            int current_filter = filter_mode;
+
+            if(current_filter == 0)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.12f, 0.14f, 0.18f, 1.00f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.12f, 0.14f, 0.18f, 1.00f));
+            }
+
+            if (ImGui::Button("Все")) { filter_mode = 0; }
+
+            if(current_filter == 0)
+            {
+                ImGui::PopStyleColor(2);
+            }
+
+            ImGui::SameLine();
+
+            bool is_empty = list.tasks.empty();
+
+            if(is_empty)
+            {
+                ImGui::BeginDisabled(true);
+            }
+
+            if(current_filter == 1)
+            {
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.12f, 0.14f, 0.18f, 1.00f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.12f, 0.14f, 0.18f, 1.00f));
+            }
+
+            if (ImGui::Button("В процессе")) { filter_mode = 1; }
+            if(current_filter == 1) { ImGui::PopStyleColor(2); }
+
+            ImGui::SameLine();
+
+            if(current_filter == 2)
+            {
+               ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.12f, 0.14f, 0.18f, 1.00f));
+               ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.12f, 0.14f, 0.18f, 1.00f)); 
+            }
+
+            if (ImGui::Button("Выполненные")) { filter_mode = 2; }
+            if(current_filter == 2) { ImGui::PopStyleColor(2); }
+
+
+            if(is_empty)
+            {
+                ImGui::EndDisabled();
+            }
+
+            ImGui::Spacing();
 
             ImGuiWindowFlags child_flags = ImGuiWindowFlags_HorizontalScrollbar;
 
@@ -448,6 +502,16 @@ int main(int, char**)
                 Task& task = list.tasks[i];
 
                 bool is_completed = task.GetCompleted();
+
+                if(filter_mode == 1 && is_completed)
+                {
+                    continue;
+                }
+
+                if(filter_mode == 2 && !is_completed)
+                {
+                    continue;
+                }
 
 
                 if(ImGui::Checkbox(("##check_" + std::to_string(i)).c_str(), &is_completed))
