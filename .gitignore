@@ -8,3 +8,4 @@ external/
 *.obj
 *.pdb
 *.ilk
+*.iss
